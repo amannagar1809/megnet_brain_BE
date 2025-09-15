@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  customerInfo: {
+  customer: {
     name: {
       type: String,
       required: true,
@@ -42,9 +42,11 @@ const orderSchema = new mongoose.Schema({
       lowercase: true,
     },
     address: {
-      type: String,
-      required: true,
-      trim: true,
+      street: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      country: String,
     },
   },
   items: [orderItemSchema],

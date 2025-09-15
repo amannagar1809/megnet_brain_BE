@@ -21,8 +21,10 @@ const createPayPalOrder = async (req, res, next) => {
   const { orderId } = req.body;
 
   try {
+    console.log('Creating PayPal order for orderId:', orderId);
     const order = await Order.findById(orderId);
     if (!order) {
+      console.error('Order not found:', orderId);
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
@@ -42,11 +44,13 @@ const createPayPalOrder = async (req, res, next) => {
     });
 
     const response = await client.execute(request);
+    console.log('PayPal order created:', response.result.id);
     order.paypalOrderId = response.result.id;
     await order.save();
 
     res.status(201).json({ success: true, data: response.result });
   } catch (error) {
+    console.error('Error creating PayPal order:', error);
     next(error);
   }
 };

@@ -7,11 +7,11 @@ const generateOrderNumber = () => {
 };
 
 // @desc    Create new order
-// @route   POST /api/orders
+// @route   POST /api/orders/create
 // @access  Public
 const createOrder = async (req, res, next) => {
   try {
-    const { customerInfo, items } = req.body;
+    const { customer, items } = req.body;
 
     // Validate items and calculate total
     let totalAmount = 0;
@@ -48,7 +48,7 @@ const createOrder = async (req, res, next) => {
 
     const order = await Order.create({
       orderNumber: generateOrderNumber(),
-      customerInfo,
+      customer,
       items: orderItems,
       totalAmount,
     });
@@ -68,6 +68,30 @@ const createOrder = async (req, res, next) => {
 const getOrder = async (req, res, next) => {
   try {
     const order = await Order.findOne({ orderNumber: req.params.orderNumber })
+      .populate('items.product', 'name price image');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get order by PayPal order ID
+// @route   GET /api/orders/paypal/:paypalOrderId
+// @access  Public
+const getOrderByPayPalId = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ paypalOrderId: req.params.paypalOrderId })
       .populate('items.product', 'name price image');
 
     if (!order) {
@@ -153,6 +177,7 @@ const getOrders = async (req, res, next) => {
 module.exports = {
   createOrder,
   getOrder,
+  getOrderByPayPalId,
   updateOrderStatus,
   getOrders,
 };
